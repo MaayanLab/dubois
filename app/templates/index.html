@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Dubois Lab – PPAR signaling activation in PSC-CMs</title>
+    <title>Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
@@ -15,7 +15,7 @@
     <!-- Navbar -->
     <nav class="navbar py-2">
         <div class="container my-1">
-            <a class="navbar-brand pl-3" href="#">Dubois Lab – PPAR signaling activation in PSC-CMs</a>
+            <a class="navbar-brand pl-3" href="#">Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
             <div id="links" class="d-table text-right">
                 <div class="d-table-cell align-middle">
                     <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
@@ -56,9 +56,7 @@
                 <div class="d-none d-lg-block">
                     <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
                     <div class="card">
-                        <p>Pluripotent stem cell-derived cardiomyocytes (hPSC-CMs) enable the in vitro study of human heart biology but they remain functionally and structurally immature. In vivo heart development involves a metabolic switch from glycolysis to fatty acid oxidation (FAO) that coincides with increased Peroxisome-Proliferator-Associated-Receptor (PPAR) signaling activity.</p>
-                        <p>Here we show that PPAR signaling activation in hPSC-CMs enhances metabolic and structural maturation in an isoform-specific manner. PPARdelta activation improves myofibril organization and increases binucleation, with no effect on contractility. PPARdelta activation further upregulates the gene regulatory network involved in FAO, increases mitochondrial content and FAO flux in hPSC-CMs. Transient lactate treatment also induces transcriptional maturation, and shows a similar metabolic response upon PPARd activation.</p>
-                        <p>In summary, we identify a role for PPARdelta signaling in recapitulating the metabolic switch to FAO in hPSC-CMs, with no effect on contractility, thus uncoupling a metabolic prerequisite from contractile maturation during early heart development.</p>
+                        {{ os.environ.get('DUBOIS_ABSTRACT', '<p>Abstract goes here</p>')|safe }}
                     </div>
                 </div>
             </div>
@@ -102,9 +100,7 @@
                 <div class="d-block d-lg-none">
                     <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
                     <div class="card">
-                        <p>Pluripotent stem cell-derived cardiomyocytes (hPSC-CMs) enable the in vitro study of human heart biology but they remain functionally and structurally immature. In vivo heart development involves a metabolic switch from glycolysis to fatty acid oxidation (FAO) that coincides with increased Peroxisome-Proliferator-Associated-Receptor (PPAR) signaling activity.</p>
-                        <p>Here we show that PPAR signaling activation in hPSC-CMs enhances metabolic and structural maturation in an isoform-specific manner. PPARdelta activation improves myofibril organization and increases binucleation, with no effect on contractility. PPARdelta activation further upregulates the gene regulatory network involved in FAO, increases mitochondrial content and FAO flux in hPSC-CMs. Transient lactate treatment also induces transcriptional maturation, and shows a similar metabolic response upon PPARd activation.</p>
-                        <p>In summary, we identify a role for PPARdelta signaling in recapitulating the metabolic switch to FAO in hPSC-CMs, with no effect on contractility, thus uncoupling a metabolic prerequisite from contractile maturation during early heart development.</p>
+                        {{ os.environ.get('DUBOIS_ABSTRACT', '<p>Abstract goes here</p>')|safe }}
                     </div>
                 </div>
             </div>

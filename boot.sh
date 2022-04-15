@@ -60,11 +60,11 @@ http {
         keepalive_timeout 0;
         large_client_header_buffers 8 32k;
 
-        location /static  {
+        location ${DUBOIS_ENTRYPOINT}/static  {
             alias $root/app/static;
         }
 
-        location / {
+        location ${DUBOIS_ENTRYPOINT} {
             include            /etc/nginx/uwsgi_params;
             uwsgi_pass         127.0.0.1:8080;
             proxy_redirect     off;

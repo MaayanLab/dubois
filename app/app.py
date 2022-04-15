@@ -26,15 +26,15 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 # import numpy as np
-entry_point = '/dubois'
+entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/dubois')
 app = Flask(__name__, static_url_path=os.path.join('/app/static'))
 
 ##### 2. Authentication #####
-# if os.environ.get('AUTHENTICATION'):
-# 	for key in ['BASIC_AUTH_USERNAME', 'BASIC_AUTH_PASSWORD']:
-# 		app.config[key] = os.environ.get(key)
-# 	app.config['BASIC_AUTH_FORCE'] = True
-# 	basic_auth = BasicAuth(app)
+if json.loads(os.environ.get('AUTHENTICATION', 'false')):
+	for key in ['BASIC_AUTH_USERNAME', 'BASIC_AUTH_PASSWORD']:
+		app.config[key] = os.environ.get(key)
+	app.config['BASIC_AUTH_FORCE'] = True
+	basic_auth = BasicAuth(app)
 
 ##### 3. Prefix middleware #####
 class PrefixMiddleware(object):
@@ -67,7 +67,8 @@ expression_dataframe = pd.read_csv(expression_file, index_col='gene_symbol', sep
 
 # Metadata
 metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
-metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
+metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
+# metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
 
 # Groups
 with open(groups_file) as openfile:
@@ -96,7 +97,7 @@ def index():
 		group_dict = json.load(openfile)
 
 	# Return
-	return render_template('index.html', group_dict=group_dict)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+	return render_template('index.html', group_dict=group_dict, os=os)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
 
 ##################################################
 ########## 2.2 APIs
