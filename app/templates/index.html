@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dubois Lab – PPAR signaling activation in PSC-CMs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="h-100">
+
+    <!-- Navbar -->
+    <nav class="navbar py-2">
+        <div class="container my-1">
+            <a class="navbar-brand pl-3" href="#">Dubois Lab – PPAR signaling activation in PSC-CMs</a>
+            <div id="links" class="d-table text-right">
+                <div class="d-table-cell align-middle">
+                    <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
+                </div>
+                <div class="d-table-cell align-middle pr-4">
+                    <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
+                    <a href="http://www.duboislab.com/" class="d-block">Dubois Lab</a>
+                </div>
+            </div>
+            <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
+        </div>
+    </nav>
+
+
+    <div class="container px-4 pb-5" style="min-height: 100%;">
+
+        <!-- Title -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="h4 pl-2 mb-4">RNA-Seq Data Explorer</div>
+            </div>
+        </div>
+
+        <!-- RNA-Seq Explorer -->
+        <div class="row">
+
+            <!-- Boxplots -->
+            <div class="col-lg-8 col-xl-9 mb-4">
+
+                <!-- Selector and plot -->
+                <div class="card">
+                    <div>Search a gene symbol:</div>
+                    <select id="gene-select" class="mt-2"></select>
+                    <div id="boxplot" class="plotly-plot chart"></div>
+                </div>
+
+                <!-- Abstract large -->
+                <div class="d-none d-lg-block">
+                    <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
+                    <div class="card">
+                        <p>Pluripotent stem cell-derived cardiomyocytes (hPSC-CMs) enable the in vitro study of human heart biology but they remain functionally and structurally immature. In vivo heart development involves a metabolic switch from glycolysis to fatty acid oxidation (FAO) that coincides with increased Peroxisome-Proliferator-Associated-Receptor (PPAR) signaling activity.</p>
+                        <p>Here we show that PPAR signaling activation in hPSC-CMs enhances metabolic and structural maturation in an isoform-specific manner. PPARdelta activation improves myofibril organization and increases binucleation, with no effect on contractility. PPARdelta activation further upregulates the gene regulatory network involved in FAO, increases mitochondrial content and FAO flux in hPSC-CMs. Transient lactate treatment also induces transcriptional maturation, and shows a similar metabolic response upon PPARd activation.</p>
+                        <p>In summary, we identify a role for PPARdelta signaling in recapitulating the metabolic switch to FAO in hPSC-CMs, with no effect on contractility, thus uncoupling a metabolic prerequisite from contractile maturation during early heart development.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Table -->
+            <div class="col-lg-4 col-xl-3">
+                <div class="card">
+                    <p style="font-size: 0.97rem;">Select conditions below to toggle them from the plot:</p>
+                    <table id="condition-table" class="table my-0 text-center">
+                        <thead>
+                            <tr>
+                                <th>GROUP</th>
+                                <th>CONDITION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group, conditions in group_dict.items()%}
+                                {% set grouploop = loop %}
+                                {% for condition in conditions %}
+                                    <tr>
+                                        {% if loop.first %}
+                                            <td rowspan="{{ conditions|length }}" class="align-middle border">
+                                                {{ group|safe }}
+                                            </td>
+                                        {% endif %}
+                                        <td class="border p-0"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_string="{{ condition['group_string'] }}">{{ condition['group_label'].replace('+ PPAR', '+<br> PPAR').replace('Body', '<br>Body<br>')|safe }}</button></td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Abstract small -->
+        <div class="row">
+            <div class="col-12">
+
+                <!-- Abstract large -->
+                <div class="d-block d-lg-none">
+                    <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
+                    <div class="card">
+                        <p>Pluripotent stem cell-derived cardiomyocytes (hPSC-CMs) enable the in vitro study of human heart biology but they remain functionally and structurally immature. In vivo heart development involves a metabolic switch from glycolysis to fatty acid oxidation (FAO) that coincides with increased Peroxisome-Proliferator-Associated-Receptor (PPAR) signaling activity.</p>
+                        <p>Here we show that PPAR signaling activation in hPSC-CMs enhances metabolic and structural maturation in an isoform-specific manner. PPARdelta activation improves myofibril organization and increases binucleation, with no effect on contractility. PPARdelta activation further upregulates the gene regulatory network involved in FAO, increases mitochondrial content and FAO flux in hPSC-CMs. Transient lactate treatment also induces transcriptional maturation, and shows a similar metabolic response upon PPARd activation.</p>
+                        <p>In summary, we identify a role for PPARdelta signaling in recapitulating the metabolic switch to FAO in hPSC-CMs, with no effect on contractility, thus uncoupling a metabolic prerequisite from contractile maturation during early heart development.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+<!-- 
+    <div id="footer">
+        <div class="container px-5 py-4">
+            <div class="row">
+                <div class="col-6">
+                    <a href="https://icahn.mssm.edu/">
+                        <img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="width: 200px;">
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+    </div> -->
+
+    <!-- Scripts -->
+    <div id="scripts">
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.min.js"></script>
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    </div>
+</body>
+</html>
