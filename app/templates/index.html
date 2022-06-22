@@ -90,7 +90,8 @@
                                                 {{ group|safe }}
                                             </td>
                                         {% endif %}
-                                        <td class="border p-0"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_string="{{ condition['group_string'] }}">{{ condition['group_label'].replace('+ PPAR', '+<br> PPAR').replace('Body', '<br>Body<br>')|safe }}</button></td>
+                                        <td class="border p-0"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_label="{{ condition['group_label'] }}">{{ condition['group_label'].replace('+ PPAR', '+<br> PPAR').replace('Body', '<br>Body<br>')|safe }}</button></td>
+                                        <!-- Can modify this above line to make formatting specific for the conditions/words that I'm working with-->
                                     </tr>
                                 {% endfor %}
                             {% endfor %}

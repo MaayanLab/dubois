@@ -41,13 +41,14 @@ $(document).ready(function ()
 
         // Gene
         var gene_symbol = $('#gene-select').val();
-        if (!gene_symbol.length) {
-            gene_symbol = 'A1BG';
-        }
+        // if (!gene_symbol.length) {
+        //     gene_symbol = 'A1BG';
+        // }
+        // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work?
 
         // Conditions
         var conditions = [];
-        $('.condition-btn.plotted').each(function() { conditions.push($(this).attr('data-group_string')) }); conditions
+        $('.condition-btn.plotted').each(function() { conditions.push($(this).attr('data-group_label')) }); conditions
 
         // AJAX Query
         $.ajax({
@@ -61,7 +62,7 @@ $(document).ready(function ()
             },
             success: function (res) {
                 $('#boxplot').removeClass('loading');
-                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true}); // maybe plotly.react is better here
+                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true}); // maybe plotly.react will be faster here
             }
         });
 
