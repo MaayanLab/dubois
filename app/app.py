@@ -97,7 +97,7 @@ def general_plot_api(expression_file, groups_file):
 
 	# Loop
 	for condition in conditions:
-		fig.add_trace(go.Box(name=rename_dict[condition], y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
+		fig.add_trace(go.Box(name=condition, y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
 	
 	# Layout
 	fig.update_layout(
@@ -116,21 +116,21 @@ def general_plot_api(expression_file, groups_file):
 	
 
 
-expression_file = 'app/static/data/kallisto-logcpm.txt'
-metadata_file = 'app/static/data/dubois-metadata.txt'
-groups_file = 'app/static/data/dubois-groups.json'
+expression_file = 'app/static/data/processedv2.txt'
+metadata_file = 'app/static/data/testhivanmetadata.txt'
+groups_file = 'app/static/data/hivangroups.json'
 
 ##### 2. Data #####
 # Expression
-expression_dataframe = pd.read_csv(expression_file, index_col='gene_symbol', sep='\t')
+expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
 
-# Metadata
-metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
-metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
-# Have the same label names as logcpm columns.
-metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
-### Note that, for metadata, only useful columns are 'sample_name' (even this is kind of useless) and 'Condition' (which can be hard coded-- tell me what samples go w/ what condition.)
-### ^^ At least for now. Later, we can think about how to more 'systematically' get this info from GEO.
+# # Metadata
+# metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
+# metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
+# # Have the same label names as logcpm columns.
+# metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
+# ### Note that, for metadata, only useful columns are 'sample_name' (even this is kind of useless) and 'Condition' (which can be hard coded-- tell me what samples go w/ what condition.)
+# ### ^^ At least for now. Later, we can think about how to more 'systematically' get this info from GEO.
 
 # Groups
 with open(groups_file) as openfile:
