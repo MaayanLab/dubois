@@ -61,7 +61,7 @@ $(document).ready(function ()
             },
             success: function (res) {
                 $('#boxplot').removeClass('loading');
-                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true});
+                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true}); // maybe plotly.react is better here
             }
         });
 
@@ -76,11 +76,11 @@ $(document).ready(function ()
 
     // Conditions
     $('.condition-btn').on('click', function(evt) {
-        $(this).toggleClass('plotted');
+        $(this).toggleClass('plotted'); // making a specific button plotted or not
         boxplot();
     })
 
     // 3. Plot
-    boxplot();
+    boxplot(); // for initial plotting?
 
 })

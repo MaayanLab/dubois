@@ -26,6 +26,11 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 # import numpy as np
+
+# Maybe make entry point / to get into a home page; can redirect to 'dubois'-- OR can take advantage of URL's and the data that can be stored in them?-- I need a home page anyways, dynamic
+# urls seem like a pain for now. Actually, URL's that hold information sound better. 1. Make 'dubois' the index page, and 2. Make subpages that are dynamically generated that can host the plots.
+
+# Change entry point
 entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/dubois')
 app = Flask(__name__, static_url_path=os.path.join('/app/static'))
 
@@ -57,6 +62,38 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 ########## 2. Data
 #############################################ow toow
 ##### 1. Files #####
+##### Make these variable dependent
+###
+
+
+def general_plot_api(expression_file, groups_file):
+	"""
+	Inputs:
+	- expression_file, a string filename referencing a tab separated text file representing a matrix with rows representing gene symbols and columns with the Sample ID's
+	- groups_file, a string filename referencing a JSON file representing the groups, where each group contains 1. names of conditions and 2. the samples belonging to each condition.
+	- metadata_file
+	Outputs: 
+	"""
+	expression_dataframe = pd.read_csv(expression_file, index_col='gene_symbol', sep='\t')
+	with open(groups_file) as openfile:
+		group_dict = json.load(openfile)
+	
+	### Actual plotting
+	data = request.json
+	gene_symbol = data['gene_symbol']
+	conditions = data['conditions']
+
+	### Melt data
+	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('sample_name')
+
+	### Get the conditions in this dataframe
+
+	### Get plot dataframe
+
+
+	
+
+
 expression_file = 'app/static/data/kallisto-logcpm.txt'
 metadata_file = 'app/static/data/dubois-metadata.txt'
 groups_file = 'app/static/data/dubois-groups.json'
@@ -68,7 +105,10 @@ expression_dataframe = pd.read_csv(expression_file, index_col='gene_symbol', sep
 # Metadata
 metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
 metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
-# metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
+# Have the same label names as logcpm columns.
+metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
+### Note that, for metadata, only useful columns are 'sample_name' (even this is kind of useless) and 'Condition' (which can be hard coded-- tell me what samples go w/ what condition.)
+### ^^ At least for now. Later, we can think about how to more 'systematically' get this info from GEO.
 
 # Groups
 with open(groups_file) as openfile:
@@ -109,9 +149,10 @@ def index():
 
 @app.route('/api/genes')
 
+# this will likely stay the same.
 def genes_api():
 
-	# Get json
+	# Get genes json
 	genes_json = json.dumps([{'gene_symbol': x} for x in expression_dataframe.index])
 
 	# Return
@@ -128,7 +169,9 @@ def plot_api():
 	# Get data
 	data = request.json
 	gene_symbol = data['gene_symbol']
+	# print(gene_symbol)
 	conditions = data['conditions']
+	# print(conditions)
 	
 	# Melt data
 	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('sample_name').reset_index().merge(metadata_dataframe, on='sample_name')
