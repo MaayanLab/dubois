@@ -65,59 +65,8 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 ##### Make these variable dependent
 ###
 
-
-def general_plot_api(expression_file, groups_file):
-	"""
-	Inputs:
-	- expression_file, a string filename referencing a tsv file representing a matrix with rows representing gene symbols and columns with the Sample ID's
-	- groups_file, a string filename referencing a JSON file representing the groups, where each group contains the names of conditions.
-	- metadata_file, a string filename referencing a tsv file with two columns: one with sample ID's, and the other with the names of the conditions. Column names are 'sample_name'
-	and 'Condition', respectively.
-	Outputs: 
-	"""
-	expression_dataframe = pd.read_csv(expression_file, index_col='gene_symbol', sep='\t')
-	metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
-	with open(groups_file) as openfile:
-		group_dict = json.load(openfile)
-	
-	### Actual plotting
-	data = request.json
-	gene_symbol = data['gene_symbol']
-	conditions = data['conditions']
-
-	### Melt data
-	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('sample_name').reset_index().merge(metadata_dataframe, on='sample_name')
-
-	### Get plot dataframe
-	plot_dataframe = melted_dataframe.groupby('Condition')['logcpm'].agg([np.mean, np.std, lambda x: list(x)])#.rename(columns={'<lambda>': 'points'})#.reindex(conditions)
-	plot_dataframe = plot_dataframe.rename(columns={plot_dataframe.columns[-1]: 'points'})
-
-	# Initialize figure
-	fig = go.Figure()
-
-	# Loop
-	for condition in conditions:
-		fig.add_trace(go.Box(name=condition, y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
-	
-	# Layout
-	fig.update_layout(
-		title = {'text': gene_symbol+' gene expression', 'x': 0.5, 'y': 0.85, 'xanchor': 'center', 'yanchor': 'top'},
-		xaxis_title = 'Condition',
-		yaxis_title = 'Expression<br>(log10 counts per million)',
-		showlegend = False
-	)
-
-	# Return
-	return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-
-
-
-	
-
-
 expression_file = 'app/static/data/processedv2.txt'
-metadata_file = 'app/static/data/testhivanmetadata.txt'
+metadata_file = 'app/static/data/testhivanmetadata2.txt'
 groups_file = 'app/static/data/hivangroups.json'
 
 ##### 2. Data #####
@@ -125,7 +74,7 @@ groups_file = 'app/static/data/hivangroups.json'
 expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
 
 # # Metadata
-# metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
+metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
 # metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
 # # Have the same label names as logcpm columns.
 # metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
@@ -187,6 +136,16 @@ def genes_api():
 @app.route('/api/plot', methods=['GET', 'POST'])
 
 def plot_api():
+	"""
+	Inputs:
+	- expression_file, a string filename referencing a tsv file representing a matrix with rows having indices representing gene symbols and columns with indices representing Sample ID's.
+		Each entry represents the expression value for a gene in a sample.
+	- groups_file, a string filename referencing a JSON file representing the groups, where each group contains the names of conditions. Format: {group_name:[{'group_label': condition_name}]}
+	- metadata_file, a string filename referencing a tsv file with two columns: one with sample ID's, and the other with the names of the conditions. Column names are 'Sample'
+	and 'Condition', respectively. 'Sample' names should match Sample ID's found in expression_file, and 'Condition' names should match condition names in groups_file.
+	Outputs: 
+	- plotly_json, a serialized JSON formatted string that represents the data for the boxplot to be plotted, used by boxplot() function in scripts.js.
+	"""
 
 	# Get data
 	data = request.json
@@ -196,21 +155,18 @@ def plot_api():
 	# print(conditions)
 	
 	# Melt data
-	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('sample_name').reset_index().merge(metadata_dataframe, on='sample_name')
+	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('Sample').reset_index().merge(metadata_dataframe, on='Sample')
 
 	# Get plot dataframe
 	plot_dataframe = melted_dataframe.groupby('Condition')['logcpm'].agg([np.mean, np.std, lambda x: list(x)])#.rename(columns={'<lambda>': 'points'})#.reindex(conditions)
 	plot_dataframe = plot_dataframe.rename(columns={plot_dataframe.columns[-1]: 'points'})
-	
-	# Rename groups-- create a mapping from group strings to labels
-	rename_dict = pd.DataFrame([x for key, value in group_dict.items() for x in value]).set_index('group_string').to_dict()['group_label']
 
 	# Initialize figure
 	fig = go.Figure()
 
 	# Loop
 	for condition in conditions:
-		fig.add_trace(go.Box(name=rename_dict[condition], y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
+		fig.add_trace(go.Box(name=condition, y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
 	
 	# Layout
 	fig.update_layout(
