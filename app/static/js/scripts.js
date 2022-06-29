@@ -42,7 +42,7 @@ $(document).ready(function ()
         // Gene
         var gene_symbol = $('#gene-select').val();
         if (!gene_symbol.length) {
-            gene_symbol = 'Atp6v0d1';
+            gene_symbol = '1600012H06Rik';
          }
         // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work?
 

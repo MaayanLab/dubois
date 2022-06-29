@@ -81,12 +81,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for group, conditions in group_dict.items()%}
+                            {% for group, conditions_dict in metadata_dict.items()%}
                                 {% set grouploop = loop %}
-                                {% for condition in conditions %}
+                                {% for condition in conditions_dict.keys() %}
                                     <tr>
                                         {% if loop.first %}
-                                            <td rowspan="{{ conditions|length }}" class="align-middle border">
+                                            <td rowspan="{{ conditions_dict.keys()|length }}" class="align-middle border">
                                                 {{ group|safe }}
                                             </td>
                                         {% endif %}

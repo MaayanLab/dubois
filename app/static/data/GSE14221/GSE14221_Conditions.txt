@@ -1,0 +1,5 @@
+Sample	Condition
+GSM356334	Transgenic 6 Weeks
+GSM356335	Transgenic 8 Weeks
+GSM356336	Control 8 Weeks
+GSM356337	Control 6 Weeks
