@@ -17,7 +17,7 @@
 ########## 1. Load libraries
 #############################################
 ##### 1. Flask modules #####
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, session
 from flask_basicauth import BasicAuth
 import os
 import json
@@ -33,6 +33,7 @@ import numpy as np
 # Change entry point
 entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/dubois')
 app = Flask(__name__, static_url_path=os.path.join('/app/static'))
+app.secret_key = "hello"
 
 ##### 2. Authentication #####
 if json.loads(os.environ.get('AUTHENTICATION', 'false')):
@@ -65,25 +66,24 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 ##### Make these variable dependent
 ###
 
-expression_file = 'app/static/data/processedv2.txt'
-metadata_file = 'app/static/data/testhivanmetadata2.txt'
-groups_file = 'app/static/data/hivangroups.json'
+# expression_file = 'app/static/data/GSE69074_Expression.txt'
+# metadata_file = 'app/static/data/GSE69074_Metadata.json'
 
 ##### 2. Data #####
 # Expression
-expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
+# expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
 
-# # Metadata
-metadata_dataframe = pd.read_csv(metadata_file, sep='\t')
-# metadata_dataframe['sample_name'] = metadata_dataframe['Sample']
-# # Have the same label names as logcpm columns.
-# metadata_dataframe['sample_name'] = ['sample_'+str(x).replace('.', '_') for x in metadata_dataframe['Sample']]
-# ### Note that, for metadata, only useful columns are 'sample_name' (even this is kind of useless) and 'Condition' (which can be hard coded-- tell me what samples go w/ what condition.)
-# ### ^^ At least for now. Later, we can think about how to more 'systematically' get this info from GEO.
+# Metadata
+# with open(metadata_file) as openfile:
+# 	metadata_dict = json.load(openfile)
 
-# Groups
-with open(groups_file) as openfile:
-	group_dict = json.load(openfile)
+# Get samples to conditions mapping
+# samp_to_cond = {}
+
+# for conditions_dict in metadata_dict.values():
+# 	for condition, samples_list in conditions_dict.items():
+# 		for sample in samples_list:
+# 			samp_to_cond[sample] = condition
 
 #######################################################
 #######################################################
@@ -100,15 +100,19 @@ with open(groups_file) as openfile:
 #############################################
 ### Landing page for the website.
 
-@app.route('/')
-def index():
+@app.route('/<geo_accession>')
+def gene_explorer(geo_accession):
 
+	# Data
+	session['geo_accession'] = geo_accession
+	metadata_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Metadata.json'
+	
 	# Groups
-	with open(groups_file) as openfile:
-		group_dict = json.load(openfile)
+	with open(metadata_file) as openfile:
+		metadata_dict = json.load(openfile)
 
 	# Return
-	return render_template('index.html', group_dict=group_dict, os=os)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+	return render_template('index.html', metadata_dict=metadata_dict, os=os)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
 
 ##################################################
 ########## 2.2 APIs
@@ -124,6 +128,10 @@ def index():
 def genes_api():
 
 	# Get genes json
+	geo_accession = session['geo_accession']
+	expression_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Expression.txt'
+	expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
+
 	genes_json = json.dumps([{'gene_symbol': x} for x in expression_dataframe.index])
 
 	# Return
@@ -138,14 +146,27 @@ def genes_api():
 def plot_api():
 	"""
 	Inputs:
-	- expression_file, a string filename referencing a tsv file representing a matrix with rows having indices representing gene symbols and columns with indices representing Sample ID's.
+	- expression_dataframe, a tsv file representing a matrix with rows having indices representing gene symbols and columns with indices representing Sample ID's. 
 		Each entry represents the expression value for a gene in a sample.
-	- groups_file, a string filename referencing a JSON file representing the groups, where each group contains the names of conditions. Format: {group_name:[{'group_label': condition_name}]}
-	- metadata_file, a string filename referencing a tsv file with two columns: one with sample ID's, and the other with the names of the conditions. Column names are 'Sample'
-	and 'Condition', respectively. 'Sample' names should match Sample ID's found in expression_file, and 'Condition' names should match condition names in groups_file.
+	- metadata_dict, a JSON file with the following format: {group_name:{condition_names:[sample_name, ...]}}
+
 	Outputs: 
 	- plotly_json, a serialized JSON formatted string that represents the data for the boxplot to be plotted, used by boxplot() function in scripts.js.
 	"""
+	geo_accession = session['geo_accession']
+	expression_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Expression.txt'
+	metadata_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Metadata.json'
+	expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
+	with open(metadata_file) as openfile:
+		metadata_dict = json.load(openfile)
+	
+	# Get samples to conditions mapping
+	samp_to_cond = {}
+
+	for conditions_dict in metadata_dict.values():
+		for condition, samples_list in conditions_dict.items():
+			for sample in samples_list:
+				samp_to_cond[sample] = condition
 
 	# Get data
 	data = request.json
@@ -153,9 +174,10 @@ def plot_api():
 	# print(gene_symbol)
 	conditions = data['conditions']
 	# print(conditions)
-	
-	# Melt data
-	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('Sample').reset_index().merge(metadata_dataframe, on='Sample')
+
+	# Create a new dataframe that maps each sample to its condition
+	melted_dataframe = expression_dataframe.loc[gene_symbol].rename('logcpm').rename_axis('Sample').reset_index()
+	melted_dataframe['Condition'] = melted_dataframe['Sample'].map(samp_to_cond)
 
 	# Get plot dataframe
 	plot_dataframe = melted_dataframe.groupby('Condition')['logcpm'].agg([np.mean, np.std, lambda x: list(x)])#.rename(columns={'<lambda>': 'points'})#.reindex(conditions)
