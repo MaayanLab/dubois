@@ -2,3 +2,4 @@ Flask
 flask-basicauth
 pandas
 plotly
+GEOparse

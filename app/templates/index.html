@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</title>
+    <title>Experiment: {{ suppl_meta.get('title', ["Title Not Found"])[0]|safe }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
@@ -23,7 +23,7 @@
     <!-- Navbar -->
     <nav class="navbar py-2">
         <div class="container my-1">
-            <a class="navbar-brand pl-3" href="#">Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
+            <a class="brand pl-3 col-med-12 col-lg-8" href="#" style="text-decoration : none">Experiment: {{ suppl_meta.get('title', ["Title Not Found"])[0]|safe }}</a>
             <div id="links" class="d-table text-right">
                 <div class="d-table-cell align-middle">
                     <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
@@ -31,6 +31,7 @@
                 <div class="d-table-cell align-middle pr-4">
                     <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
                     <a href="http://www.duboislab.com/" class="d-block">Dubois Lab</a>
+                    <!-- ^^ Include 'dubois lab' link? -->
                 </div>
             </div>
             <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
@@ -56,15 +57,17 @@
                 <!-- Selector and plot -->
                 <div class="card">
                     <div>Search a gene symbol:</div>
-                    <select id="gene-select" class="mt-2"></select>
-                    <div id="boxplot" class="plotly-plot chart"></div>
+                    <select id="gene-select" class="mt-2" data-geo-acc="{{ geo_accession }}"></select>
+                    <div id="boxplot" class="plotly-plot chart" data-geo-acc="{{ geo_accession }}"></div>
                 </div>
 
                 <!-- Abstract large -->
                 <div class="d-none d-lg-block">
-                    <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
+                    <div class="h4 pl-2 mt-5 mb-4">Summary</div>
                     <div class="card">
-                        {{ os.environ.get('DUBOIS_ABSTRACT', '<p>Abstract goes here</p>')|safe }}
+                        {% for paragraph in suppl_meta.get('summary', ['Summary Not Found']) %}
+                            <p>{{ paragraph|safe }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -81,16 +84,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for group, conditions_dict in metadata_dict.items()%}
+                            {% for group, conditions_dict in metadata_dict.items() %}
                                 {% set grouploop = loop %}
                                 {% for condition in conditions_dict.keys() %}
                                     <tr>
                                         {% if loop.first %}
-                                            <td rowspan="{{ conditions_dict.keys()|length }}" class="align-middle border">
+                                            <td rowspan="{{ conditions_dict.keys()|length }}" class="align-middle border tablesel">
                                                 {{ group|safe }}
                                             </td>
                                         {% endif %}
-                                        <td class="border p-0"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_label="{{ condition }}">{{ condition.replace('+ PPAR', '+<br> PPAR').replace('Body', '<br>Body<br>')|safe }}</button></td>
+                                        <td class="border p-0 tablesel"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_label="{{ condition }}">{{ condition.replace('+ PPAR', '+<br> PPAR').replace('Body', '<br>Body<br>')|safe }}</button></td>
                                         <!-- Can modify this above line to make formatting specific for the conditions/words that I'm working with-->
                                     </tr>
                                 {% endfor %}
@@ -107,9 +110,11 @@
 
                 <!-- Abstract large -->
                 <div class="d-block d-lg-none">
-                    <div class="h4 pl-2 mt-5 mb-4">Abstract</div>
+                    <div class="h4 pl-2 mt-5 mb-4">Summary</div>
                     <div class="card">
-                        {{ os.environ.get('DUBOIS_ABSTRACT', '<p>Abstract goes here</p>')|safe }}
+                        {% for paragraph in suppl_meta.get('summary', ['Summary Not Found']) %}
+                            <p>{{ paragraph|safe }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

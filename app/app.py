@@ -25,13 +25,15 @@ import plotly
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+import GEOparse
+from geometa import get_metadata
 # import numpy as np
 
 # Maybe make entry point / to get into a home page; can redirect to 'dubois'-- OR can take advantage of URL's and the data that can be stored in them?-- I need a home page anyways, dynamic
 # urls seem like a pain for now. Actually, URL's that hold information sound better. 1. Make 'dubois' the index page, and 2. Make subpages that are dynamically generated that can host the plots.
 
 # Change entry point
-entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/dubois')
+entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/gene-viewer')
 app = Flask(__name__, static_url_path=os.path.join('/app/static'))
 app.secret_key = "hello"
 
@@ -104,15 +106,17 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 def gene_explorer(geo_accession):
 
 	# Data
-	session['geo_accession'] = geo_accession
 	metadata_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Metadata.json'
 	
 	# Groups
 	with open(metadata_file) as openfile:
 		metadata_dict = json.load(openfile)
+	
+	# Supplementary Metadata
+	suppl_meta = get_metadata(geo_accession)
 
 	# Return
-	return render_template('index.html', metadata_dict=metadata_dict, os=os)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+	return render_template('index.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, suppl_meta = suppl_meta)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
 
 ##################################################
 ########## 2.2 APIs
@@ -122,13 +126,12 @@ def gene_explorer(geo_accession):
 ########## 1. Genes
 #############################################
 
-@app.route('/api/genes')
+@app.route('/api/genes/<geo_accession>')
 
 # this will likely stay the same.
-def genes_api():
+def genes_api(geo_accession):
 
 	# Get genes json
-	geo_accession = session['geo_accession']
 	expression_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Expression.txt'
 	expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')
 
@@ -141,9 +144,9 @@ def genes_api():
 ########## 2. Plot
 #############################################
 
-@app.route('/api/plot', methods=['GET', 'POST'])
+@app.route('/api/plot/<geo_accession>', methods=['GET', 'POST'])
 
-def plot_api():
+def plot_api(geo_accession):
 	"""
 	Inputs:
 	- expression_dataframe, a tsv file representing a matrix with rows having indices representing gene symbols and columns with indices representing Sample ID's. 
@@ -153,7 +156,6 @@ def plot_api():
 	Outputs: 
 	- plotly_json, a serialized JSON formatted string that represents the data for the boxplot to be plotted, used by boxplot() function in scripts.js.
 	"""
-	geo_accession = session['geo_accession']
 	expression_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Expression.txt'
 	metadata_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Metadata.json'
 	expression_dataframe = pd.read_csv(expression_file, index_col = 0, sep='\t')

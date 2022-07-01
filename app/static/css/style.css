@@ -5,8 +5,10 @@ body {
   font-family: "IBM Plex Sans", sans-serif;
 }
 
+
 .container {
   max-width: 1400px;
+  /* border: 1px solid black */
 }
 
 h4 {
@@ -22,10 +24,28 @@ h4 {
   box-shadow: 0 0 25px rgba(26, 108, 225, 0.1);
 }
 
-.navbar-brand {
+.brand {
   color: #001737 !important;
   font-size: 19pt;
   font-weight: 500;
+  line-height: 50px;
+  border: 1px solid black;
+  /* max-width: 70%; */
+}
+
+/* @media screen and (max-width: 1332px) {
+  .brand {
+    color: #001737 !important;
+    font-size: 19pt;
+    font-weight: 500;
+    line-height: 50px;
+    border: 1px solid black;
+    max-width: 100%;
+  }
+} */
+
+.brand a:hover{
+  text-decoration: none !important;
 }
 
 .d-table a {
@@ -58,6 +78,8 @@ h4 {
     font-weight: 600;
 }
 
+
+
 /* Footer */
 #footer {
   background-color: #FFFFFF;
@@ -82,6 +104,15 @@ h4 {
 /* Plot */
 #boxplot {
   min-height: 450px;
+}
+
+/* Extra Classes */
+/* .break-word{
+  word-break: break-word;
+} */
+
+.btn{
+  white-space: normal;
 }
 
 /* Table

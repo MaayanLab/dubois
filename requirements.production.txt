@@ -3,3 +3,4 @@ flask-basicauth
 uwsgi
 pandas
 plotly
+GEOparse

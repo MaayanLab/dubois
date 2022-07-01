@@ -18,7 +18,7 @@ $(document).ready(function ()
         load: function (query, callback) {
             // if (!query.length) return callback();
             $.ajax({
-                url: "api/genes",//"{{ url_for('genes_api') }}",
+                url: "api/genes/" + $('#gene-select').attr('data-geo-acc'),//"{{ url_for('genes_api') }}",
                 dataType: 'json',
                 error: function () {
                     callback();
@@ -44,7 +44,7 @@ $(document).ready(function ()
         if (!gene_symbol.length) {
             gene_symbol = '1600012H06Rik';
          }
-        // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work?
+        // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work? How to make it auto select first one?-- idk.
 
         // Conditions
         var conditions = [];
@@ -52,7 +52,7 @@ $(document).ready(function ()
 
         // AJAX Query
         $.ajax({
-            url: "api/plot", //"{{ url_for('plot_api') }}",
+            url: "api/plot/" + $('#boxplot').attr('data-geo-acc'), //"{{ url_for('plot_api') }}",
             method: 'post',
             data: JSON.stringify({'gene_symbol': gene_symbol, 'conditions': conditions}),
             contentType: 'application/json',
@@ -83,5 +83,6 @@ $(document).ready(function ()
 
     // 3. Plot
     boxplot(); // for initial plotting?
+    
 
 })
