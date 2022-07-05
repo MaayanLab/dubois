@@ -26,7 +26,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import GEOparse
-from geometa import get_metadata
+from geometa import get_metadata, open_metadata
 # import numpy as np
 
 # Maybe make entry point / to get into a home page; can redirect to 'dubois'-- OR can take advantage of URL's and the data that can be stored in them?-- I need a home page anyways, dynamic
@@ -102,6 +102,18 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 #############################################
 ### Landing page for the website.
 
+@app.route('/')
+def home():
+	# Get all GSE's in Data
+	gse_list = []
+	for root, dirs, files in os.walk('app\static\data'):
+		for dir in dirs:
+			gse_path = os.path.join(root, dir)
+			gse_acc = os.path.basename(gse_path)
+			gse_list.append(gse_acc)
+	print(gse_list)
+	return render_template('home.html', gse_list = gse_list)
+
 @app.route('/<geo_accession>')
 def gene_explorer(geo_accession):
 
@@ -113,10 +125,10 @@ def gene_explorer(geo_accession):
 		metadata_dict = json.load(openfile)
 	
 	# Supplementary Metadata
-	suppl_meta = get_metadata(geo_accession)
+	geo_meta = get_metadata(geo_accession)
 
 	# Return
-	return render_template('index.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, suppl_meta = suppl_meta)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+	return render_template('viewer.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, geo_meta = geo_meta)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
 
 ##################################################
 ########## 2.2 APIs
@@ -192,11 +204,14 @@ def plot_api(geo_accession):
 	for condition in conditions:
 		fig.add_trace(go.Box(name=condition, y=plot_dataframe.loc[condition, 'points'], boxpoints='all', pointpos=0))
 	
+	# Determine y-axis expression string
+
+	# if 
 	# Layout
 	fig.update_layout(
 		title = {'text': gene_symbol+' gene expression', 'x': 0.5, 'y': 0.85, 'xanchor': 'center', 'yanchor': 'top'},
 		xaxis_title = 'Condition',
-		yaxis_title = 'Expression<br>(log10 counts per million)',
+		yaxis_title = 'Expression<br>(Microarray: RMA Normalized; RNA-seq: log10 RPKM)',
 		showlegend = False
 	)
 
