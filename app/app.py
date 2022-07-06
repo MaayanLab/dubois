@@ -26,7 +26,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import GEOparse
-from geometa import get_metadata, open_metadata
+from functools import cache
+from geometa import get_metadata
 # import numpy as np
 
 # Maybe make entry point / to get into a home page; can redirect to 'dubois'-- OR can take advantage of URL's and the data that can be stored in them?-- I need a home page anyways, dynamic
@@ -87,6 +88,17 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 # 		for sample in samples_list:
 # 			samp_to_cond[sample] = condition
 
+gse_list = []
+for root, dirs, files in os.walk('app/static/data'):
+	for dir in dirs:
+		gse_path = os.path.join(root, dir)
+		gse_acc = os.path.basename(gse_path)
+		gse_list.append(gse_acc)
+
+gse_metadata = {}
+for gse_acc in gse_list:
+	gse_metadata[gse_acc] = get_metadata(gse_acc)
+
 #######################################################
 #######################################################
 ########## 2. Routes
@@ -104,18 +116,13 @@ app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix=entry_point)
 
 @app.route('/')
 def home():
-	# Get all GSE's in Data
-	gse_list = []
-	for root, dirs, files in os.walk('app\static\data'):
-		for dir in dirs:
-			gse_path = os.path.join(root, dir)
-			gse_acc = os.path.basename(gse_path)
-			gse_list.append(gse_acc)
-	print(gse_list)
-	return render_template('home.html', gse_list = gse_list)
+	return render_template('home.html', gse_list = gse_list, gse_metadata = gse_metadata, metadata_dict = metadata_dict)
 
 @app.route('/<geo_accession>')
 def gene_explorer(geo_accession):
+
+	if geo_accession not in gse_list:
+		return render_template('error.html', gse_list = gse_list)
 
 	# Data
 	metadata_file = 'app/static/data/' + geo_accession + '/' + geo_accession + '_Metadata.json'
@@ -125,10 +132,10 @@ def gene_explorer(geo_accession):
 		metadata_dict = json.load(openfile)
 	
 	# Supplementary Metadata
-	geo_meta = get_metadata(geo_accession)
+	geo_meta = gse_metadata[geo_accession]
 
 	# Return
-	return render_template('viewer.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, geo_meta = geo_meta)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+	return render_template('viewer.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, geo_meta = geo_meta, gse_list=gse_list)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
 
 ##################################################
 ########## 2.2 APIs
@@ -141,6 +148,7 @@ def gene_explorer(geo_accession):
 @app.route('/api/genes/<geo_accession>')
 
 # this will likely stay the same.
+@cache
 def genes_api(geo_accession):
 
 	# Get genes json

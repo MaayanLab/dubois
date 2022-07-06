@@ -42,8 +42,13 @@ $(document).ready(function ()
         // Gene
         var gene_symbol = $('#gene-select').val();
         if (!gene_symbol.length) {
-            gene_symbol = '1600012H06Rik';
-         }
+            if ($('#gene-select').attr('data-geo-acc') == "GSE35226-GPL6244") {
+                gene_symbol = 'A1CF';
+            }
+            else {
+                gene_symbol = '1600012H06Rik';
+            }
+        }
         // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work? How to make it auto select first one?-- idk.
 
         // Conditions
@@ -52,7 +57,7 @@ $(document).ready(function ()
 
         // AJAX Query
         $.ajax({
-            url: "api/plot/" + $('#boxplot').attr('data-geo-acc'), //"{{ url_for('plot_api') }}",
+            url: "api/plot/" + $('#boxplot').attr('data-geo-acc'), //"{{ url_for('plot_api') }} + "/" + $('#boxplot').attr('data-geo-acc'),
             method: 'post',
             data: JSON.stringify({'gene_symbol': gene_symbol, 'conditions': conditions}),
             contentType: 'application/json',
@@ -66,7 +71,8 @@ $(document).ready(function ()
             }
         });
 
-    }
+    };
+
 
     // 2. Listeners
     // Gene
