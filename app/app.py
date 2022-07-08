@@ -26,6 +26,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import GEOparse
+import ftfy
 from functools import cache
 from geometa import get_metadata
 # import numpy as np
@@ -36,7 +37,7 @@ from geometa import get_metadata
 # Change entry point
 entry_point = os.environ.get('DUBOIS_ENTRYPOINT', '/gene-viewer')
 app = Flask(__name__, static_url_path=os.path.join('/app/static'))
-app.secret_key = "hello"
+app.secret_key = "hello" #what is this for???
 
 ##### 2. Authentication #####
 if json.loads(os.environ.get('AUTHENTICATION', 'false')):
@@ -94,6 +95,8 @@ for root, dirs, files in os.walk('app/static/data'):
 		gse_path = os.path.join(root, dir)
 		gse_acc = os.path.basename(gse_path)
 		gse_list.append(gse_acc)
+gse_list = sorted(gse_list, key=lambda x: (int(x.split('-', 1)[0][3:])))
+print(gse_list)
 
 gse_metadata = {}
 for gse_acc in gse_list:
@@ -116,7 +119,12 @@ for gse_acc in gse_list:
 
 @app.route('/')
 def home():
-	return render_template('home.html', gse_list = gse_list, gse_metadata = gse_metadata, metadata_dict = metadata_dict)
+	return render_template('home.html', gse_list = gse_list, gse_metadata = gse_metadata)
+
+
+@app.route('/about')
+def about():
+	return render_template('about.html', gse_list = gse_list, gse_metadata = gse_metadata)
 
 @app.route('/<geo_accession>')
 def gene_explorer(geo_accession):
@@ -136,6 +144,8 @@ def gene_explorer(geo_accession):
 
 	# Return
 	return render_template('viewer.html', metadata_dict=metadata_dict, os=os, geo_accession=geo_accession, geo_meta = geo_meta, gse_list=gse_list)#, sample_dataframe=sample_dataframe, conditions_dict=conditions_dict)
+
+
 
 ##################################################
 ########## 2.2 APIs
@@ -214,7 +224,6 @@ def plot_api(geo_accession):
 	
 	# Determine y-axis expression string
 
-	# if 
 	# Layout
 	fig.update_layout(
 		title = {'text': gene_symbol+' gene expression', 'x': 0.5, 'y': 0.85, 'xanchor': 'center', 'yanchor': 'top'},

@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{ geo_accession }}: {{ geo_meta.get('title', ["Title Not Found"])[0]|safe }}</title>
+    <meta name="description" content="Microarray and RNA-seq Gene Expression Data Visualization Tool">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
@@ -19,39 +20,40 @@
     </script>
 </head>
 <body class="h-100">
-
     <nav class="navbar navbar-expand-md navbar-dark bg-primary">
-        <a class="navbar-brand" href="{{ url_for('home') }}">Gene Viewer</a>
+        <a class="navbar-brand" href="{{ url_for('home') }}">Gene Viewer: HIVAN</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+        <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mr-auto">
+        <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('home') }}">About</a>
+            <a class="nav-link" href="{{ url_for('about') }}">About</a>
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 HIVAN Studies
-              </a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     {% for gse_acc in gse_list %}
                         {% if geo_accession == gse_acc %}
-                            <a class="dropdown-item active" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc }} <span class="sr-only">(current)</span></a>
+                            <a class="dropdown-item active" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc.replace('GSE117987', 'GSE117987: KLF15').replace('GSE14221', 'GSE14221: Tg26').replace('GSE35226-GPL1261', 'GSE35226-1261: Tg26 Cortex').replace('GSE35226-GPL6244', 'GSE35226-GPL6244: HEK HIPK').replace('GSE69074', '
+                                GSE69074: Tg26 Injury').replace('GSE86269', 'GSE86269: Tg FVB/CAST').replace('GSE87546', 'GSE87546: Tg26 Lymphoma') }} <span class="sr-only">(current)</span></a>
                         {% else %}
-                            <a class="dropdown-item" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc }}</a>
+                            <a class="dropdown-item" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc.replace('GSE117987', 'GSE117987: KLF15').replace('GSE14221', 'GSE14221: Tg26').replace('GSE35226-GPL1261', 'GSE35226-1261: Tg26 Cortex').replace('GSE35226-GPL6244', 'GSE35226-GPL6244: HEK HIPK').replace('GSE69074', '
+                                GSE69074: Tg26 Injury').replace('GSE86269', 'GSE86269: Tg FVB/CAST').replace('GSE87546', 'GSE87546: Tg26 Lymphoma') }}</a>
                         {% endif %}
                     {% endfor %}
-              </div>
+            </div>
             </li>
-          </ul>
-          <form class="form-inline my-2 my-lg-0">
+        </ul>
+        <!-- <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-          </form>
+        </form> -->
         </div>
     </nav>
 
@@ -179,17 +181,18 @@
         </div>
     </div>
     
+    
     <div class="w-100" id="footer">
         <div class="container">
             <div class="row mx-auto">
-                <div class="col-3 d-flex justify-content-center align-items-center">
+                <div class="col-2 d-flex justify-content-center align-items-center">
                     <div class="d-flex justify-content-center" style="width:260px">
-                       <img src="{{ url_for('static', filename='img/mscbi_logo.png') }}" height=100>
+                    <img src="{{ url_for('static', filename='img/mscbi_logo.png') }}" height=100>
                     </div>
                 </div>
             
-                <div class="col-6">
-                    <ul class="text-center" style="list-style: none">
+                <div class="col-6 text-center">
+                    <ul style="list-style: none">
                         <li class="text-info"><a href="http://icahn.mssm.edu/research/labs/maayan-laboratory" target="_blank" rel="noopener noreferrer">The Ma'ayan Lab</a></li>
                         <li class="text-info"><a href="http://icahn.mssm.edu/research/bioinformatics" target="_blank" rel="noopener noreferrer">Mount Sinai Center for Bioinformatics</a></li>
                         <li class="text-info"><a href="http://www.lincs-dcic.org/" target="_blank" rel="noopener noreferrer">BD2K-LINCS Data Coordination and Integration Center (DCIC)</a></li>
@@ -198,7 +201,27 @@
                         <li class="text-info"><a href="https://commonfund.nih.gov/idg/index" target="_blank" rel="noopener noreferrer">NIH Illuminating the Druggable Genome (IDG) Program</a></li>
                     </ul>
                 </div>
-                <div class="col-3 d-flex justify-content-center align-items-center">
+
+                <div class="col-2 d-flex align-items-center">
+                    <div>
+                        <a class="btn btn-secondary mb-3" href="https://github.com/MaayanLab/dubois-viewer/" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                View source code
+                        </a>
+                        <a class="btn btn-secondary" href="https://github.com/MaayanLab/dubois-viewer/issues/new" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                Submit an issue
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-2 d-flex justify-content-center align-items-center">
                     <div> 
                         <img src="{{ url_for('static', filename='img/dcic.png') }}" height=100>
                         <div class="text-center">
@@ -223,7 +246,7 @@
         
     </div> -->
 
-    <!-- Scripts -->
+<!-- Scripts -->
     <div id="scripts">
         <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
