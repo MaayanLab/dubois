@@ -102,7 +102,6 @@ gse_metadata = {}
 for gse_acc in gse_list:
 	gse_metadata[gse_acc] = get_metadata(gse_acc)
 
-print("hello world")
 
 #######################################################
 #######################################################
