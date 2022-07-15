@@ -18,7 +18,7 @@ $(document).ready(function ()
         load: function (query, callback) {
             // if (!query.length) return callback();
             $.ajax({
-                url: "api/genes",//"{{ url_for('genes_api') }}",
+                url: "api/genes/" + $('#gene-select').attr('data-geo-acc'),//"{{ url_for('genes_api') }}",
                 dataType: 'json',
                 error: function () {
                     callback();
@@ -42,16 +42,22 @@ $(document).ready(function ()
         // Gene
         var gene_symbol = $('#gene-select').val();
         if (!gene_symbol.length) {
-            gene_symbol = 'A1BG';
+            if ($('#gene-select').attr('data-geo-acc') == "GSE35226-GPL6244") {
+                gene_symbol = 'A1CF';
+            }
+            else {
+                gene_symbol = '1600012H06Rik';
+            }
         }
+        // ^^ Can decide on a standard gene symbol for Mice/Humans depending on what is first? A1BG might work? How to make it auto select first one?-- idk.
 
         // Conditions
         var conditions = [];
-        $('.condition-btn.plotted').each(function() { conditions.push($(this).attr('data-group_string')) }); conditions
+        $('.condition-btn.plotted').each(function() { conditions.push($(this).attr('data-group_label')) }); conditions
 
         // AJAX Query
         $.ajax({
-            url: "api/plot", //"{{ url_for('plot_api') }}",
+            url: "api/plot/" + $('#boxplot').attr('data-geo-acc'), //"{{ url_for('plot_api') }} + "/" + $('#boxplot').attr('data-geo-acc'),
             method: 'post',
             data: JSON.stringify({'gene_symbol': gene_symbol, 'conditions': conditions}),
             contentType: 'application/json',
@@ -61,11 +67,12 @@ $(document).ready(function ()
             },
             success: function (res) {
                 $('#boxplot').removeClass('loading');
-                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true});
+                Plotly.newPlot('boxplot', res['data'], res['layout'], config={responsive: true}); // maybe plotly.react will be faster here
             }
         });
 
-    }
+    };
+
 
     // 2. Listeners
     // Gene
@@ -76,11 +83,12 @@ $(document).ready(function ()
 
     // Conditions
     $('.condition-btn').on('click', function(evt) {
-        $(this).toggleClass('plotted');
+        $(this).toggleClass('plotted'); // making a specific button plotted or not
         boxplot();
     })
 
     // 3. Plot
-    boxplot();
+    boxplot(); // for initial plotting?
+    
 
 })

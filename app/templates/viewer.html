@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html class="h-100">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{ geo_accession }}: {{ geo_meta.get('title', ["Title Not Found"])[0]|safe }}</title>
+    <meta name="description" content="Microarray and RNA-seq Gene Expression Data Visualization Tool">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CZ20EVL6L9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { window.dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-CZ20EVL6L9');
+    </script>
+</head>
+<body class="h-100">
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Gene Viewer: HIVAN</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('about') }}">About</a>
+            </li>
+            <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                HIVAN Studies
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% for gse_acc in gse_list %}
+                        {% if geo_accession == gse_acc %}
+                            <a class="dropdown-item active" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc.replace('GSE117987', 'GSE117987: KLF15').replace('GSE14221', 'GSE14221: Tg26').replace('GSE35226-GPL1261', 'GSE35226-1261: Tg26 Cortex').replace('GSE35226-GPL6244', 'GSE35226-GPL6244: HEK HIPK').replace('GSE69074', '
+                                GSE69074: Tg26 Injury').replace('GSE86269', 'GSE86269: Tg FVB/CAST').replace('GSE87546', 'GSE87546: Tg26 Lymphoma') }} <span class="sr-only">(current)</span></a>
+                        {% else %}
+                            <a class="dropdown-item" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc.replace('GSE117987', 'GSE117987: KLF15').replace('GSE14221', 'GSE14221: Tg26').replace('GSE35226-GPL1261', 'GSE35226-1261: Tg26 Cortex').replace('GSE35226-GPL6244', 'GSE35226-GPL6244: HEK HIPK').replace('GSE69074', '
+                                GSE69074: Tg26 Injury').replace('GSE86269', 'GSE86269: Tg FVB/CAST').replace('GSE87546', 'GSE87546: Tg26 Lymphoma') }}</a>
+                        {% endif %}
+                    {% endfor %}
+            </div>
+            </li>
+        </ul>
+        <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+        </div>
+    </nav>
+
+    <!-- Navbar -->
+    <nav class="navbar py-2">
+        <div class="container my-1">
+            <a class="brand pl-3 col-med-12 col-lg-8" href="#" style="text-decoration: none">{{ geo_accession }}: {{ geo_meta.get('title', ["Title Not Found"])[0]|safe }}</a>
+            <div id="links" class="d-table text-right">
+                <div class="d-table-cell align-middle">
+                    <a href="https://icahn.mssm.edu/" target="_blank" rel="noopener noreferrer"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
+                </div>
+                <div class="d-table-cell align-middle pr-4">
+                    <a href="https://labs.icahn.mssm.edu/maayanlab/" target="_blank" rel="noopener noreferrer" class="d-block mb-1">Ma'ayan Lab</a>
+                    <!-- <a href="http://www.duboislab.com/" target="_blank" rel="noopener noreferrer" class="d-block">Dubois Lab</a> -->
+                    <!-- ^^ Include 'dubois lab' link? -->
+                </div>
+            </div>
+            <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
+        </div>
+    </nav>
+
+
+    <div class="container px-4 pb-5" style="min-height: 100%;">
+
+        <!-- Title -->
+        <div class="row mt-4">
+            
+            <div class="col-12">
+                <div class="h4 pl-2 mb-4">
+                    {% if geo_meta.get('type') == ['Expression profiling by array'] %}
+                        Microarray Data Explorer
+                    {% elif geo_meta.get('type') == ['Expression profiling by high throughput sequencing'] %}
+                        RNA-Seq Data Explorer
+                    {% else %}
+                        Gene Expression Data Explorer
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Gene Expression Explorer -->
+        <div class="row">
+
+            <!-- Boxplots -->
+            <div class="col-lg-8 col-xl-9 mb-4">
+
+                <!-- Selector and plot -->
+                <div class="card">
+                    <div>Search a gene symbol:</div>
+                    <select id="gene-select" class="mt-2" data-geo-acc="{{ geo_accession }}"></select>
+                    <div id="boxplot" class="plotly-plot chart" data-geo-acc="{{ geo_accession }}"></div>
+                </div>
+
+                <!-- Abstract large -->
+                <div class="d-none d-lg-block">
+                    <div class="h4 pl-2 mt-5 mb-4">Description</div>
+                    <div class="card">
+                        <p class="text-primary">Submission Date: <span style="color:#212529">{{ (geo_meta.get('submission_date')[0][:-5] + ',' + geo_meta.get('submission_date')[0][-5:])|safe }}</span></p>
+                        {% for paragraph in geo_meta.get('summary', ['Summary Not Found']) %}
+                            {% if loop.first %}
+                                <p class="text-primary">Summary: <span style="color:#212529">{{ paragraph|safe }}</span></p>
+                            {% else %}
+                                <p>{{ paragraph|safe }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        <p class="text-primary">GEO Accession ID: <a class="text-info" href="{{ geo_meta.get('gse_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ geo_meta.get('geo_accession', ['GEO Accession ID Not Found'])[0] }}</a></p>
+                        <p class="text-primary">Pubmed ID: <a class="text-info" href="{{ geo_meta.get('pubmed_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ geo_meta.get('pubmed_id', ['No Pubmed ID'])[0]|safe }}</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Table -->
+            <div class="col-lg-4 col-xl-3">
+                <div class="card">
+                    <p style="font-size: 0.97rem;">Select conditions below to toggle them from the plot:</p>
+                    <table id="condition-table" class="table my-0 text-center">
+                        <thead>
+                            <tr>
+                                <th>GROUP</th>
+                                <th>CONDITION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group, conditions_dict in metadata_dict.items() %}
+                                {% set grouploop = loop %}
+                                {% for condition in conditions_dict.keys() %}
+                                    <tr>
+                                        {% if loop.first %}
+                                            <td rowspan="{{ conditions_dict.keys()|length }}" class="align-middle border">
+                                                {{ group|safe }}
+                                            </td>
+                                        {% endif %}
+                                        <td class="border p-0"><button class="btn w-100 m-0 rounded-0 py-0 condition-btn{{' active plotted' if grouploop.first}}" data-toggle="button" aria-pressed="{{ grouploop.first|lower }}" autocomplete="off" data-group_label="{{ condition }}">{{ condition|safe }}</button></td>
+                                        <!-- Can modify this above line to make formatting specific for the conditions/words that I'm working with-->
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Abstract small -->
+        <div class="row">
+            <div class="col-12">
+
+                <!-- Abstract large -->
+                <div class="d-block d-lg-none">
+                    <div class="h4 pl-2 mt-5 mb-4">Description</div>
+                    <div class="card">
+                        <p class="text-primary">Submission Date: <span style="color:#212529">{{ (geo_meta.get('submission_date')[0][:-5] + ',' + geo_meta.get('submission_date')[0][-5:])|safe }}</span></p>
+                        {% for paragraph in geo_meta.get('summary', ['Summary Not Found']) %}
+                            {% if loop.first %}
+                                <p class="text-primary">Summary: <span style="color:#212529">{{ paragraph|safe }}</span></p>
+                            {% else %}
+                                <p>{{ paragraph|safe }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        <p class="text-primary">GEO Accession ID: <a class="text-info" href="{{ geo_meta.get('gse_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ geo_meta.get('geo_accession', ['GEO Accession ID Not Found'])[0] }}</a></p>
+                        <p class="text-primary">Pubmed ID: <a class="text-info" href="{{ geo_meta.get('pubmed_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ geo_meta.get('pubmed_id', ['No Pubmed ID'])[0]|safe }}</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <div class="w-100" id="footer">
+        <div class="container">
+            <div class="row mx-auto">
+                <div class="col-2 d-flex justify-content-center align-items-center">
+                    <div class="d-flex justify-content-center" style="width:260px">
+                    <img src="{{ url_for('static', filename='img/mscbi_logo.png') }}" height=100>
+                    </div>
+                </div>
+            
+                <div class="col-6 text-center">
+                    <ul style="list-style: none">
+                        <li class="text-info"><a href="http://icahn.mssm.edu/research/labs/maayan-laboratory" target="_blank" rel="noopener noreferrer">The Ma'ayan Lab</a></li>
+                        <li class="text-info"><a href="http://icahn.mssm.edu/research/bioinformatics" target="_blank" rel="noopener noreferrer">Mount Sinai Center for Bioinformatics</a></li>
+                        <li class="text-info"><a href="http://www.lincs-dcic.org/" target="_blank" rel="noopener noreferrer">BD2K-LINCS Data Coordination and Integration Center (DCIC)</a></li>
+                        <li class="text-info"><a href="http://www.lincsproject.org/" target="_blank" rel="noopener noreferrer">NIH LINCS program</a></li>
+                        <li class="text-info"><a href="http://bd2k.nih.gov/" target="_blank" rel="noopener noreferrer">NIH Big Data to Knowledge (BD2K)</a></li>
+                        <li class="text-info"><a href="https://commonfund.nih.gov/idg/index" target="_blank" rel="noopener noreferrer">NIH Illuminating the Druggable Genome (IDG) Program</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-2 d-flex align-items-center">
+                    <div>
+                        <a class="btn btn-secondary mb-3" href="https://github.com/MaayanLab/dubois-viewer/" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                View source code
+                        </a>
+                        <a class="btn btn-secondary" href="https://github.com/MaayanLab/dubois-viewer/issues/new" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                Submit an issue
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-2 d-flex justify-content-center align-items-center">
+                    <div> 
+                        <img src="{{ url_for('static', filename='img/dcic.png') }}" height=100>
+                        <div class="text-center">
+                            © Ma'ayan Lab
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- 
+    <div id="footer">
+        <div class="container px-5 py-4">
+            <div class="row">
+                <div class="col-6">
+                    <a href="https://icahn.mssm.edu/">
+                        <img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="width: 200px;">
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+    </div> -->
+
+<!-- Scripts -->
+    <div id="scripts">
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.min.js"></script>
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Gene Viewer: HIVAN</title>
+    <meta name="description" content="Microarray and RNA-seq Gene Expression Data Visualization Tool">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.default.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homepg.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CZ20EVL6L9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { window.dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-CZ20EVL6L9');
+    </script>
+</head>
+<body class="h-100">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+        <a class="navbar-brand" href="{{ url_for('home') }}">Gene Viewer: HIVAN</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+            <a class="nav-link" href="{{ url_for('home') }}">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('about') }}">About</a>
+            </li>
+            <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                HIVAN Studies
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {% for gse_acc in gse_list %}
+                        <a class="dropdown-item" href="{{ url_for('gene_explorer', geo_accession= gse_acc) }}">{{ gse_acc.replace('GSE117987', 'GSE117987: KLF15').replace('GSE14221', 'GSE14221: Tg26').replace('GSE35226-GPL1261', 'GSE35226-1261: Tg26 Cortex').replace('GSE35226-GPL6244', 'GSE35226-GPL6244: HEK HIPK').replace('GSE69074', '
+                            GSE69074: Tg26 Injury').replace('GSE86269', 'GSE86269: Tg FVB/CAST').replace('GSE87546', 'GSE87546: Tg26 Lymphoma') }}</a>
+                    {% endfor %}
+            </div>
+            </li>
+        </ul>
+        <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+        </form> -->
+        </div>
+    </nav>
+
+    <div class="container px-4 pb-4" style="min-height: 100%;">
+
+        <!-- Title -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="h1 text-center">Gene Viewer: HIVAN</div>
+                <div class="h4 text-center">An Interactive Gene Expression Viewer</div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <!-- Abstract large -->
+                <div class="d-block">
+                    <div class="card">
+                        <div class="h4 text-center">What is Gene Viewer?</div>
+                        <p>
+                            Gene Viewer is an interactive website for visualizing gene expression data from Microarray
+                            and RNA-seq experiments. You can pick which experimental conditions to compare using the table
+                            on the right, and you can choose which gene to compare expression across using the gene search bar.
+                            Your choices will be displayed in a boxplot, with the conditions on the x-axis and RMA-normalized
+                            counts or log10 RPKM counts on the y-axis depending on whether the assay type was Microarray or RNA-seq,
+                            respectively.
+                        </p>
+                        <p>
+                            Gene Viewer was developed by the Ma'ayan Laboratory.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container card table-responsive-lg mb-4">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">GSE Accession ID</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Assay</th>
+                    <th scope="col">Submission Date</th>
+                    <th scope="col">Overall Design</th>
+                    <th scope="col">Pubmed ID</th>
+                    <th scope="col">Gene Viewer Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gse_id in gse_list %}
+                    <tr>
+                        <th scope="row"><a class="text-primary" href="{{ gse_metadata[gse_id].get('gse_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ gse_id }}</a></th>
+                        <td>{{ gse_metadata[gse_id].get('title', ['No Title'])[0]|safe}}</td>
+                        <td>
+                            {% if gse_metadata[gse_id].get('type', ['No Assay'])|length > 1 %}
+                                {% for assay in gse_metadata[gse_id].get('type', ['No Assay']) %}
+                                    <p>{{ assay|safe }}</p>
+                                {% endfor %}
+                            {% else %}
+                                {{ gse_metadata[gse_id].get('type', ['No Assay'])[0]|safe }}
+                            {% endif %}
+                        </td>
+                        <td>{{ (gse_metadata[gse_id].get('submission_date')[0][:-5] + ',' + gse_metadata[gse_id].get('submission_date')[0][-5:])|safe }}</td>
+                        <td>{{ gse_metadata[gse_id].get('overall_design', ['No Overall Design'])[0]|safe }}</td>
+                        <td><a class="text-primary" href="{{ gse_metadata[gse_id].get('pubmed_link', ['#'])[0]|safe }}" target="_blank" rel="noopener noreferrer">{{ gse_metadata[gse_id].get('pubmed_id', ['No Pubmed ID'])[0]|safe }}</a></td>
+                        <td><a class="btn btn-outline-primary" role="button" href="{{ url_for('gene_explorer', geo_accession= gse_id) }}" target="_blank" rel="noopener noreferrer">{{ gse_id }} Gene Viewer</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div id="footer">
+        <div class="container">
+            <div class="row mx-auto">
+                <div class="col-2 d-flex justify-content-center align-items-center">
+                    <div class="d-flex justify-content-center" style="width:260px">
+                    <img src="{{ url_for('static', filename='img/mscbi_logo.png') }}" height=100>
+                    </div>
+                </div>
+            
+                <div class="col-6">
+                    <ul style="list-style: none">
+                        <li class="text-info"><a href="http://icahn.mssm.edu/research/labs/maayan-laboratory" target="_blank" rel="noopener noreferrer">The Ma'ayan Lab</a></li>
+                        <li class="text-info"><a href="http://icahn.mssm.edu/research/bioinformatics" target="_blank" rel="noopener noreferrer">Mount Sinai Center for Bioinformatics</a></li>
+                        <li class="text-info"><a href="http://www.lincs-dcic.org/" target="_blank" rel="noopener noreferrer">BD2K-LINCS Data Coordination and Integration Center (DCIC)</a></li>
+                        <li class="text-info"><a href="http://www.lincsproject.org/" target="_blank" rel="noopener noreferrer">NIH LINCS program</a></li>
+                        <li class="text-info"><a href="http://bd2k.nih.gov/" target="_blank" rel="noopener noreferrer">NIH Big Data to Knowledge (BD2K)</a></li>
+                        <li class="text-info"><a href="https://commonfund.nih.gov/idg/index" target="_blank" rel="noopener noreferrer">NIH Illuminating the Druggable Genome (IDG) Program</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-2 d-flex align-items-center">
+                    <div>
+                        <a class="btn btn-secondary mb-3" href="https://github.com/MaayanLab/dubois-viewer/" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                View source code
+                        </a>
+                        <a class="btn btn-secondary" href="https://github.com/MaayanLab/dubois-viewer/issues/new" target="_blank" rel="noopener noreferrer" role="button">
+                            <span class="badge badge-light mr-1">
+                                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+                                    style="width: 1rem;">
+                            </span>
+                                Submit an issue
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-2 d-flex justify-content-center align-items-center">
+                    <div> 
+                        <img src="{{ url_for('static', filename='img/dcic.png') }}" height=100>
+                        <div class="text-center">
+                            © Ma'ayan Lab
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div id="scripts">
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/js/standalone/selectize.min.js"></script>
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    </div>
+</body>
+</html>
