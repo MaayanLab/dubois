@@ -21,20 +21,18 @@
 <body class="h-100">
 
     <!-- Navbar -->
-    <nav class="navbar py-2">
-        <div class="container my-1">
-            <a class="navbar-brand pl-3" href="#">Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
-            <div id="links" class="d-table text-right">
-                <div class="d-table-cell align-middle">
-                    <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
-                </div>
-                <div class="d-table-cell align-middle pr-4">
-                    <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
-                    <a href="http://www.duboislab.com/" class="d-block">Dubois Lab</a>
-                </div>
+    <nav class="navbar row py-2">
+        <a class="navbar-brand m-0 col-md-6 col-lg-8 text-wrap" href="#">Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
+        <div id="links" class="d-table col-md-6 col-lg-4" style="display:block !important;">
+            <div class="d-table-cell align-middle text-center">
+                <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
             </div>
-            <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
+            <div class="d-table-cell align-middle text-center">
+                <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
+                <a href="http://www.duboislab.com/" class="d-block">Dubois Lab</a>
+            </div>
         </div>
+        <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
     </nav>
 
 
@@ -51,7 +49,7 @@
         <div class="row">
 
             <!-- Boxplots -->
-            <div class="col-lg-8 col-xl-9 mb-4">
+            <div class="col-lg-7 col-xl-8 mb-4">
 
                 <!-- Selector and plot -->
                 <div class="card">
@@ -70,7 +68,7 @@
             </div>
             
             <!-- Table -->
-            <div class="col-lg-4 col-xl-3">
+            <div class="col-lg-5 col-xl-4">
                 <div class="card">
                     <p style="font-size: 0.97rem;">Select conditions below to toggle them from the plot:</p>
                     <table id="condition-table" class="table my-0 text-center">
