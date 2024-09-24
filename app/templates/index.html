@@ -22,14 +22,14 @@
 
     <!-- Navbar -->
     <nav class="navbar row py-2">
-        <a class="navbar-brand m-0 col-md-6 col-lg-8 text-wrap" href="#">Dubois Lab – {{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
+        <a class="navbar-brand m-0 col-md-6 col-lg-8 text-wrap" href="#">{{ os.environ.get('DUBOIS_TITLE', 'Experiment') }}</a>
         <div id="links" class="d-table col-md-6 col-lg-4" style="display:block !important;">
             <div class="d-table-cell align-middle text-center">
                 <a href="https://icahn.mssm.edu/"><img src="{{ url_for('static', filename='img/icahn_logo.png') }}" style="height: 50px;" class="mr-4"></a>    
             </div>
             <div class="d-table-cell align-middle text-center">
-                <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
                 <a href="http://www.duboislab.com/" class="d-block">Dubois Lab</a>
+                <a href="https://labs.icahn.mssm.edu/maayanlab/" class="d-block mb-1">Ma'ayan Lab</a>
             </div>
         </div>
         <!-- <a href="#" class="mr-5"><img src="{{ url_for('static', filename='img/ismms_logo.png') }}" style="height: 35px;"></a> -->
